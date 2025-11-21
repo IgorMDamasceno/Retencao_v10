@@ -2402,10 +2402,10 @@ function getConfigSnapshot_() {
 
   const operationRows = operationValues.rows.map(function (row) {
     return {
-      id: row.id,
-      operation: row.operacao,
-      url: row.url,
-      note: row.observacao
+      id: trimString_(row.id),
+      operation: trimString_(row.operacao),
+      url: trimString_(row.url),
+      note: trimString_(row.observacao)
     };
   });
 
@@ -2420,12 +2420,12 @@ function getConfigSnapshot_() {
   const operationIntegrationRows = operationIntegrationValues.rows.map(function (row) {
     var rawActive = row.ativo;
     return {
-      id: row.id,
-      operation: row.operacao,
-      trafficType: row.tipotrafego,
-      companyId: row.empresaid,
-      domainId: row.dominioid,
-      routeSlug: row.slugrota,
+      id: trimString_(row.id),
+      operation: trimString_(row.operacao),
+      trafficType: trimString_(row.tipotrafego),
+      companyId: trimString_(row.empresaid),
+      domainId: trimString_(row.dominioid),
+      routeSlug: trimString_(row.slugrota),
       active: coerceBoolean_(rawActive)
     };
   });
@@ -2459,16 +2459,18 @@ function getConfigSnapshot_() {
 
   const trafficRows = trafficValues.rows.map(function (row) {
     return {
-      id: row.id,
-      type: row.tipo,
-      source: row.utm_source
+      id: trimString_(row.id),
+      type: trimString_(row.tipo),
+      source: trimString_(row.utm_source)
     };
   });
   const trafficByType = {};
   trafficRows.forEach(function (row) {
-    if (!row.type || !row.source) return;
-    if (!trafficByType[row.type]) trafficByType[row.type] = [];
-    trafficByType[row.type].push(row.source);
+    var normalizedType = trimString_(row.type);
+    var normalizedSource = trimString_(row.source);
+    if (!normalizedType || !normalizedSource) return;
+    if (!trafficByType[normalizedType]) trafficByType[normalizedType] = [];
+    trafficByType[normalizedType].push(normalizedSource);
   });
 
   const revshareRows = revValues.rows.map(function (row) {
@@ -3259,6 +3261,12 @@ function normalizeKey_(value) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '');
+}
+
+function trimString_(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value.trim();
+  return String(value).trim();
 }
 
 function pickValue_(row, idxMap, key) {
